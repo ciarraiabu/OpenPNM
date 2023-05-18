@@ -1,0 +1,3 @@
+class RxMerData:
+
+class RxMer:
