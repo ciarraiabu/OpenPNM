@@ -1,0 +1,34 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Development tools
+.vscode/
+.idea/
+*.swo
+*.swp
+*.pydevproject
+
+# Environment
+.env
+venv/
+env/
+ENV/
+venv*.env
+
+# Logs and temporary files
+*.log
+*.bak
+*.tmp
+
+# Project specific
+*.pyc
+__pycache__/
+
