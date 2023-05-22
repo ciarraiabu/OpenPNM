@@ -22,6 +22,7 @@ MAX_PACKET_SIZE = 516
 
 # TFTP server class
 class TFTPServer:
+    
     def __init__(self, host, port):
         self.host = host
         self.port = port

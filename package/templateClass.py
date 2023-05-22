@@ -20,6 +20,5 @@ from package.constants import *
 from package.log import *
 
 class Foo():
-
     def test():
         return STATUS_OK

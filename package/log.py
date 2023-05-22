@@ -6,7 +6,7 @@ class Log():
     ERROR_ENABLE = True
     INFO_ENABLE = True
     DEBUG_ENABLE = True
-    
+
     def __init__(self, moduleName):
         self._moduleName = "[" + moduleName + "]"
         return True

@@ -162,4 +162,3 @@ class PnmHeader:
             self.DS_CHANNEL_ID_LENGTH +
             self.CM_MAC_ADDRESS_LENGTH
         )
-
