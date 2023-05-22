@@ -31,4 +31,4 @@ venv*.env
 # Project specific
 *.pyc
 __pycache__/
-
+data/
