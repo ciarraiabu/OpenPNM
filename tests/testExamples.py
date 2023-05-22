@@ -1,5 +1,4 @@
 #! /usr/bin/python3
 
-from lib.constants import *
-from lib.log import *
-
+from package.constants import *
+from package.log import *

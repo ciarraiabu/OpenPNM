@@ -16,11 +16,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-from lib.constants import *
-from lib.log import *
+from package.constants import *
+from package.log import *
 
 class Foo():
 
     def test():
         return STATUS_OK
-

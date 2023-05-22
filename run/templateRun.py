@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
-from lib.constants import *
-from lib.log import *
+from package.constants import *
+from package.log import *
 
 
 def main():
@@ -10,4 +10,4 @@ def main():
 
 ### MAIN ###
 if __name__ == "__main__":
-     main()
+    main()
