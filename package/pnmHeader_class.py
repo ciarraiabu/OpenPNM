@@ -69,6 +69,8 @@ class PnmHeader:
         
         self.header_read = False
 
+        self._read_headers()
+
     def _open_file(self) -> Optional[io.BufferedReader]:
         """
         Open the binary file for reading.
@@ -160,7 +162,7 @@ class PnmHeader:
         
         self.header_read = True
 
-    def read_headers(self) -> List[Dict[str, Union[str, int]]]:
+    def _read_headers(self) -> List[Dict[str, Union[str, int]]]:
         """
         Read and return the headers from the binary file.
 
