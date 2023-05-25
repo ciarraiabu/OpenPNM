@@ -1,5 +1,5 @@
 from package.constants import *
-from package.log import *
+from package.log import Log
 from package.pnmHeader_class import PnmHeader
 from typing import Union, List
 import json
@@ -102,8 +102,8 @@ class RxMerData:
         Log.debug("Length of RxMer Data: " + str(self.size()))
 
     def size(self) -> int:
-        return self.values.__sizeof__()
-    
+        return len(self.values)
+
     def toJson(self) -> str:
         """
         Convert the RxMerData to a JSON string.
@@ -125,7 +125,7 @@ class RX_MER:
             pnm_header (PnmHeader): Instance of the PnmHeader class.
         """
         self.pnm_header = pnm_header
-        self.rxmer_data = self._parse_rxmer_data()
+        self.rxmer_data = None
 
     def process_data(self):
         """
@@ -133,8 +133,9 @@ class RX_MER:
 
         This method can be modified to perform the desired operations on the data.
         """
-        Log.debug("Processing data from PNM_HEADER: " + str(self.pnm_header.get_pnm_data()))
+        Log.debug("Processing data from PNM_HEADER: " + str(self.pnm_header.getPnmData()))
         # Perform the desired operations on the data here
+        self.rxmer_data = self._parse_rxmer_data()
 
     def _parse_rxmer_data(self) -> RxMerData:
         """
@@ -143,14 +144,16 @@ class RX_MER:
         Returns:
             RxMerData: The RxMER data.
         """
-        pnm_data_stream = self.pnm_header.get_pnm_data()
-        if pnm_data_stream is not None:
-            pnm_data = pnm_data_stream.read()
-            # Parse the pnm_data and extract the RxMER values
-            values = parse_rxmer_data(pnm_data)  # Implement your own parsing logic here
+        pnm_data = self.pnm_header.getPnmData()
+        if pnm_data is not None:
+            # Convert BytesIO object to list of values
+            pnm_data_list = list(pnm_data.getvalue())
+            # Parse the pnm_data_list and extract the RxMER values
+            values = [RxMerDataValue(value) for value in pnm_data_list]  # Modify parsing logic if needed
             return RxMerData(values)
         else:
             return RxMerData([])  # Return an empty RxMerData if PNM_DATA is not available
+
 
     def toJson(self) -> str:
         """
@@ -168,7 +171,3 @@ class RX_MER:
         This method can be modified to fit the desired workflow.
         """
         self.process_data()
-
-
-
-
