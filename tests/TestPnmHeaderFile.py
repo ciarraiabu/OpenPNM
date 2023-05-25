@@ -9,3 +9,5 @@ RX_MER_PATH_FILE = "/home/dev01/Projects/OpenPNM/data/rxmer"
 rxmerPnm = PnmHeader(RX_MER_PATH_FILE)
 
 rxmerPnm.read_headers()
+
+print(rxmerPnm.toJson())
