@@ -125,40 +125,50 @@ class RX_MER:
             pnm_header (PnmHeader): Instance of the PnmHeader class.
         """
         self.pnm_header = pnm_header
+        self.rxmer_data = self._parse_rxmer_data()
 
     def process_data(self):
         """
-       Process the data received from PNM_HEADER.
+        Process the data received from PNM_HEADER.
 
         This method can be modified to perform the desired operations on the data.
-
         """
-        pnm_data = self.pnm_header.getPnmData()
-
-        Log.debug("PMN-Data-Len:" + str(pnm_data.__sizeof__()))
-
-        Log.debug("Processing data from PNM_HEADER: " + str(pnm_data))
+        Log.debug("Processing data from PNM_HEADER: " + str(self.pnm_header.get_pnm_data()))
         # Perform the desired operations on the data here
 
-    def get_rxmer_data(self) -> RxMerData:
+    def _parse_rxmer_data(self) -> RxMerData:
         """
-        Get the RxMER data.
+        Parse the PNM data and extract the RxMER values.
 
         Returns:
             RxMerData: The RxMER data.
         """
-        # Modify this method to return the desired RxMER data
-        values = [RxMerDataValue(1.2), RxMerDataValue(2.3), RxMerDataValue(3.4)]  # Example values
-        return RxMerData(values)
+        pnm_data_stream = self.pnm_header.get_pnm_data()
+        if pnm_data_stream is not None:
+            pnm_data = pnm_data_stream.read()
+            # Parse the pnm_data and extract the RxMER values
+            values = parse_rxmer_data(pnm_data)  # Implement your own parsing logic here
+            return RxMerData(values)
+        else:
+            return RxMerData([])  # Return an empty RxMerData if PNM_DATA is not available
+
+    def toJson(self) -> str:
+        """
+        Convert the RX_MER object to a JSON string.
+
+        Returns:
+            str: JSON representation of the RX_MER object.
+        """
+        return self.rxmer_data.toJson()
 
     def run(self):
         """
         Run the RX_MER processing.
 
         This method can be modified to fit the desired workflow.
-
         """
         self.process_data()
+
 
 
 
