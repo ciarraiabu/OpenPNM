@@ -28,7 +28,7 @@ In summary, OpenPNM is an open-source API that empowers developers to implement 
     PROJECT_FOLDER=""
     PYTHONPATH=""; export PYTHONPATH;
 
-    AUTO_HOME="/home/dev02/Projects/${PROJECT_FOLDER}"
+    AUTO_HOME="/home/dev01/Projects/${PROJECT_FOLDER}"
     PYTHONPATH="${PYTHONPATH}:${AUTO_HOME}:${AUTO_HOME}/lib:${AUTO_HOME}/run:${AUTO_HOME}/tests"
     export PYTHONPATH
     

@@ -25,3 +25,7 @@ class Log():
     def debug(s: str):
         if (Log.LOGGING_ENABLE is True) and (Log.DEBUG_ENABLE is True):
             print("DEBUG: " + str(s))
+    
+    def warning(s: str):
+        if (Log.LOGGING_ENABLE is True) and (Log.DEBUG_ENABLE is True):
+            print("WARN: " + str(s))
