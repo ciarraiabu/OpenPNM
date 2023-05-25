@@ -280,3 +280,19 @@ class PnmHeader:
                 return pnm_stream
 
         return None
+
+    def get_pnm_data_length(self) -> Optional[int]:
+        """
+        Get the length of the PNM_DATA in bytes.
+
+        Returns:
+            int: Length of the PNM_DATA in bytes.
+        """
+        self._read_header_once()
+
+        if self.header:
+            pnm_data = self.header.get('PNM_DATA')
+            if pnm_data is not None:
+                return len(pnm_data)
+
+        return None

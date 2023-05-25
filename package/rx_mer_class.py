@@ -99,7 +99,11 @@ class RxMerData:
             values (list): List of RxMerDataValues.
         """
         self.values: List[RxMerDataValue] = values
+        Log.debug("Length of RxMer Data: " + str(self.size()))
 
+    def size(self) -> int:
+        return self.values.__sizeof__()
+    
     def toJson(self) -> str:
         """
         Convert the RxMerData to a JSON string.
