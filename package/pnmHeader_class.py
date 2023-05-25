@@ -262,3 +262,21 @@ class PnmHeader:
         if isinstance(obj, bytes):
             return obj.decode('utf-8')
         raise TypeError(f"Object of type '{obj.__class__.__name__}' is not JSON serializable.")
+
+    def getPnmData(self) -> Optional[io.BytesIO]:
+        """
+        Get the PNM_DATA as a binary stream.
+
+        Returns:
+            io.BytesIO: A BytesIO object containing the PNM_DATA.
+        """
+        self._read_header_once()
+
+        if self.header:
+            pnm_data = self.header.get('PNM_DATA')
+            if pnm_data is not None:
+                pnm_stream = io.BytesIO(pnm_data)
+                pnm_stream.seek(0)
+                return pnm_stream
+
+        return None
