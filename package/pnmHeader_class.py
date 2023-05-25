@@ -22,15 +22,23 @@ import io
 import os
 from package.log import Log
 
-class PnmHeader:
-    FILE_TYPE_LENGTH: int = 4
-    MAJOR_VERSION_LENGTH: int = 1
-    MINOR_VERSION_LENGTH: int = 1
-    CAPTURE_TIME_LENGTH: int = 4
-    DS_CHANNEL_ID_LENGTH: int = 1
-    CM_MAC_ADDRESS_LENGTH: int = 6
 
-    def __init__(self, file_path: str = None, binary_data: bytes = None) -> None:
+class PnmHeader:
+    PNM_FILE_TYPE_LENGTH = 4
+    MAJOR_VERSION_LENGTH = 1
+    MINOR_VERSION_LENGTH = 1
+    CAPTURE_TIME_LENGTH = 4
+    DS_CHANNEL_ID_LENGTH = 1
+    CM_MAC_ADDRESS_LENGTH = 6
+
+    KEY_PNM_FILE_TYPE = 'PNM File Type'
+    KEY_MAJOR_VERSION = 'Major Version'
+    KEY_MINOR_VERSION = 'Minor Version'
+    KEY_CAPTURE_TIME = 'Capture Time'
+    KEY_DS_CHANNEL_ID = 'DS Channel ID'
+    KEY_CM_MAC_ADDRESS = 'CM MAC Address'
+
+    def __init__(self, file_path: str = None, binary_data: bytes = None):
         """
         Initialize a PnmHeader object.
 
@@ -44,7 +52,7 @@ class PnmHeader:
             FileNotFoundError: If the file_path does not exist.
             TypeError: If the binary_data is not of type bytes.
         """
-        if bool(file_path) ^ bool(binary_data):
+        if bool(file_path) ^ bool(binary_data):  # Ensure only one of them is provided
             if file_path:
                 if not os.path.exists(file_path):
                     raise FileNotFoundError("File not found: {}".format(file_path))
@@ -73,12 +81,12 @@ class PnmHeader:
                 headers.append(header)
         return headers
 
-    def _open_file(self) -> io.FileIO:
+    def _open_file(self) -> io.BytesIO:
         """
         Open the binary file for reading.
 
         Returns:
-            file object: A file object opened in binary mode.
+            io.BytesIO: A BytesIO object containing the binary data.
         """
         try:
             if self.file_path is not None:
@@ -92,65 +100,61 @@ class PnmHeader:
             Log.error("An error occurred while opening the file: %s", str(e))
             return None
 
-    def _read_header(self, file: io.FileIO) -> tuple[dict, bytes]:
+    def _read_header(self, file: io.BytesIO) -> tuple:
         """
         Read and parse a single header from the binary file.
 
         Args:
-            file (file object): A file object opened in binary mode.
+            file (io.BytesIO): A BytesIO object containing the binary data.
 
         Returns:
-            tuple[dict, bytes]: A tuple containing a dictionary representing the header fields
-                               and the remaining binary data as PNM_DATA.
+            tuple: A tuple containing a dictionary representing the header fields
+                   and the remaining binary data as PNM_DATA.
         """
         header = {}
 
-        file_type = file.read(self.FILE_TYPE_LENGTH)
-        if len(file_type) < self.FILE_TYPE_LENGTH:
-            Log.error("Incomplete file type")
-            return None, None
-        header['File Type'] = struct.unpack(f'{self.FILE_TYPE_LENGTH}s', file_type)[0]
-
-        major_version = self._read_field(file, self.MAJOR_VERSION_LENGTH, 'B', "Major Version")
-        minor_version = self._read_field(file, self.MINOR_VERSION_LENGTH, 'B', "Minor Version")
-        capture_time = self._read_field(file, self.CAPTURE_TIME_LENGTH, 'I', "Capture Time")
-        ds_channel_id = self._read_field(file, self.DS_CHANNEL_ID_LENGTH, 'B', "DS Channel Id")
-        cm_mac_address = self._read_field(file, self.CM_MAC_ADDRESS_LENGTH, '6s', "CM MAC Address")
+        file_type = self._read_field(file, self.PNM_FILE_TYPE_LENGTH, f'{self.PNM_FILE_TYPE_LENGTH}s', self.KEY_PNM_FILE_TYPE)
+        major_version = self._read_field(file, self.MAJOR_VERSION_LENGTH, 'B', self.KEY_MAJOR_VERSION)
+        minor_version = self._read_field(file, self.MINOR_VERSION_LENGTH, 'B', self.KEY_MINOR_VERSION)
+        capture_time = self._read_field(file, self.CAPTURE_TIME_LENGTH, 'I', self.KEY_CAPTURE_TIME)
+        ds_channel_id = self._read_field(file, self.DS_CHANNEL_ID_LENGTH, 'B', self.KEY_DS_CHANNEL_ID)
+        cm_mac_address = self._read_field(file, self.CM_MAC_ADDRESS_LENGTH, '6s', self.KEY_CM_MAC_ADDRESS)
         if cm_mac_address is not None:
             cm_mac_address = ':'.join(f'{byte:02X}' for byte in cm_mac_address)
 
         pnm_data = file.read()
 
-        header['Major Version'] = major_version
-        header['Minor Version'] = minor_version
-        header['Capture Time'] = capture_time
-        header['DS Channel Id'] = ds_channel_id
-        header['CM MAC Address'] = cm_mac_address
+        header[self.KEY_PNM_FILE_TYPE] = file_type
+        header[self.KEY_MAJOR_VERSION] = major_version
+        header[self.KEY_MINOR_VERSION] = minor_version
+        header[self.KEY_CAPTURE_TIME] = capture_time
+        header[self.KEY_DS_CHANNEL_ID] = ds_channel_id
+        header[self.KEY_CM_MAC_ADDRESS] = cm_mac_address
 
         Log.debug("PNM_HEADER: " + header.__str__())
 
         return header, pnm_data
 
-    def _read_field(self, file: io.FileIO, length: int, format_str: str, field_name: str) -> any:
+    def _read_field(self, file: io.BytesIO, length: int, unpack_format: str, key: str):
         """
-        Read a field from the binary file using struct.unpack and advance the file position.
+        Read and unpack a single field from the binary file.
 
         Args:
-            file (file object): A file object opened in binary mode.
+            file (io.BytesIO): A BytesIO object containing the binary data.
             length (int): Length of the field to read.
-            format_str (str): Format string for struct.unpack.
-            field_name (str): Name of the field.
+            unpack_format (str): Format string for struct.unpack().
+            key (str): Key name for the field in the header dictionary.
 
         Returns:
-            any: The unpacked value of the field.
+            object: The unpacked field value.
         """
         field_data = file.read(length)
         if len(field_data) < length:
-            Log.error("Incomplete %s", field_name)
+            Log.error(f"Incomplete {key}")
             return None
-        return struct.unpack(format_str, field_data)[0]
+        return struct.unpack(unpack_format, field_data)[0]
 
-    def write_headers_to_json(self, output_file: str) -> None:
+    def write_headers_to_json(self, output_file: str):
         """
         Read the headers from the binary file and write them to a JSON file.
 
@@ -179,7 +183,9 @@ class PnmHeader:
             io.BytesIO: A BytesIO object containing the remaining binary data.
         """
         with self._open_file() as file:
+            # Skip the header fields
             file.seek(self.total_header_length())
+            # Create a BytesIO object and copy the remaining binary data into it
             remaining_data = io.BytesIO()
             remaining_data.write(file.read())
             remaining_data.seek(0)
@@ -193,10 +199,11 @@ class PnmHeader:
             int: The total length of the header fields.
         """
         return (
-            self.FILE_TYPE_LENGTH +
+            self.PNM_FILE_TYPE_LENGTH +
             self.MAJOR_VERSION_LENGTH +
             self.MINOR_VERSION_LENGTH +
             self.CAPTURE_TIME_LENGTH +
             self.DS_CHANNEL_ID_LENGTH +
             self.CM_MAC_ADDRESS_LENGTH
         )
+
